@@ -1,0 +1,11 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Example user template template
+### Example user template
+
+# IntelliJ project files
+.idea
+*.iml
+*.pyc
+
+# 当前版本含机密账号暂时不传
+/score_spider/settings.py
