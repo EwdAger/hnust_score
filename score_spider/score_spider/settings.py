@@ -69,8 +69,8 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'score_spider.pipelines.ScoreSpiderPipeline': 300,
-    # 'score_spider.pipelines.MysqlTwistedPipeline': 300,
+    # 'score_spider.pipelines.ScoreSpiderPipeline': 300,
+    'score_spider.pipelines.MysqlTwistedPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

@@ -37,7 +37,7 @@ class MysqlTwistedPipeline(object):
     def process_item(self, item, spider):
         # 使用twisted将mysql插入变成异步执行
         # query = self.dbpool.runInteraction(self.do_insert_stu, item)
-        query = self.dbpool.runInteraction(self.do_insert_sco, item)
+        query = self.dbpool.runInteraction(self.do_insert, item)
         # 处理异常
         query.addErrback(self.handle_error, item, spider)
 
@@ -46,7 +46,7 @@ class MysqlTwistedPipeline(object):
         # 在此处打断点截获异常信息
         print(failure)
 
-    def do_insert_stu(self, cursor, item):
+    def do_insert(self, cursor, item):
         # 执行具体的插入
         insert_sql = """
             INSERT INTO student_info(stu_id, stu_name, class_name, term, 
@@ -61,19 +61,19 @@ class MysqlTwistedPipeline(object):
                 item["avg_credit_point_nums"][i], item["rank"][i], item["crawl_time"].strftime(SQL_DATETIME_FORMAT)
             )
             cursor.execute(insert_sql, params)
-
-    def do_insert_sco(self, cursor, item):
-        insert_sql = """
+        # 插
+        insert_sql2 = """
             INSERT INTO score_info(stu_id, stu_name, term,
             course_name, course_nature, course_credit, course_time, score, crawl_time)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        loop = item["course_len"]
+        loop = 0
         for i in range(len(item["stu_id"])):
             for j in range(len(item["course_name_list"])):
-                params = (
+                params2 = (
                     item["stu_id"][i], item["stu_name"][i], item["term"], item["course_name_list"][j],
                     item["course_nature_list"][j], item["course_credit_list"][j], item["course_time_list"][j],
-                    item["score_list"][j+j*loop], item["crawl_time"]
+                    item["score_list"][j+item["course_len"]*loop], item["crawl_time"].strftime(SQL_DATETIME_FORMAT)
                 )
-                cursor.execute(insert_sql, params)
+                cursor.execute(insert_sql2, params2)
+            loop += 1

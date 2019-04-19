@@ -77,7 +77,6 @@ class KdjwSpider(scrapy.Spider):
     def check_login(self, response):
         # 校验是否登陆成功
         success_code = '<script language=\'javascript\'>window.location.href=\'http://kdjw.hnust.edu.cn/kdjw/framework/main.jsp\';</script>\r\n'
-        code = response.text
         if response.text != success_code:
             print("登陆失败！请重试")
         else:
@@ -95,5 +94,5 @@ class KdjwSpider(scrapy.Spider):
                 "xsfs": "1",
                 "xjzt": "01"
             }
-            yield scrapy.FormRequest(url=search_url, formdata=post_data, meta={"class_name": post_data["hbqkMc"],
-                                                                               "term": post_data["xqmc"]}, dont_filter=True)
+            yield scrapy.FormRequest(url=search_url, formdata=post_data, meta={
+                "class_name": post_data["hbqkMc"], "term": post_data["xqmc"]}, dont_filter=True)

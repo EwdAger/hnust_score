@@ -51,17 +51,3 @@ class kdjwSpiderItem(scrapy.Item):
         input_processor=MapCompose(return_value),
         output_processor=TakeFirst()
     )
-
-    def check_item(self):
-        loop = self["course_len"]
-        for i in range(len(self["stu_id"])):
-            for j in range(len(self["course_name_list"])):
-                params = (
-                    self["stu_id"][i], self["stu_name"][i], self["term"], self["course_name_list"][j],
-                    self["course_nature_list"][j], self["course_credit_list"][j], self["course_time_list"][j],
-                    self["score_list"][j+j*loop], self["crawl_time"]
-                )
-                print(params[1]+":"+params[3]+":"+params[7])
-
-
-
