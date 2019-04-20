@@ -7,6 +7,5 @@
 *.iml
 *.pyc
 
-# 当前版本含机密账号暂时不传
-/score_spider/settings.py
 /venv
+/score_spider/captcha.jpg

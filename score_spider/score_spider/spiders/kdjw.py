@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from tools.captcha_verify import verify
-from scrapy.loader import ItemLoader
 from score_spider.items import kdjwSpiderItem, kdjwSpiderItemLoader
 from datetime import datetime
-from score_spider.settings import ADMIN, PASSWORD
+from score_spider.settings import ADMIN_LIST, PASSWORD_LIST
+from score_spider.settings import mystery_post_data
 
 
 class KdjwSpider(scrapy.Spider):
@@ -52,16 +52,16 @@ class KdjwSpider(scrapy.Spider):
     def login(self, response):
         cookies_str = response.headers.get("Set-Cookie")
         cookies = {"Cookie": cookies_str}
+        for yx in range(len(mystery_post_data["yx"])):
+            post_data = {
+                "USERNAME": ADMIN_LIST[yx],
+                "PASSWORD": PASSWORD_LIST[yx],
+                "RANDOMCODE": ""
+            }
 
-        post_data = {
-            "USERNAME": ADMIN,
-            "PASSWORD": PASSWORD,
-            "RANDOMCODE": ""
-        }
-
-        captcha_url = "http://kdjw.hnust.edu.cn/kdjw/verifycode.servlet"
-        yield scrapy.Request(captcha_url, cookies=cookies, meta={"post_data": post_data},
-                             callback=self.login_after_captcha)
+            captcha_url = "http://kdjw.hnust.edu.cn/kdjw/verifycode.servlet"
+            yield scrapy.Request(captcha_url, cookies=cookies, meta={"post_data": post_data, "yx": yx},
+                                 callback=self.login_after_captcha, dont_filter=True)
 
     def login_after_captcha(self, response):
         with open("captcha.jpg", "wb") as f:
@@ -72,27 +72,41 @@ class KdjwSpider(scrapy.Spider):
         post_data = response.meta.get("post_data", {})
         post_data["RANDOMCODE"] = captcah_code
         post_url = "http://kdjw.hnust.edu.cn/kdjw/Logon.do?method=logon"
-        return [scrapy.FormRequest(url=post_url, formdata=post_data, callback=self.check_login, dont_filter=True)]
+        yx = response.meta.get("yx")
+        return [scrapy.FormRequest(url=post_url, formdata=post_data, meta={"yx": yx},
+                                   callback=self.check_login, dont_filter=True)]
 
     def check_login(self, response):
+        yx = response.meta.get("yx")
         # 校验是否登陆成功
         success_code = '<script language=\'javascript\'>window.location.href=\'http://kdjw.hnust.edu.cn/kdjw/framework/main.jsp\';</script>\r\n'
         if response.text != success_code:
-            print("登陆失败！请重试")
+            # 接入系统后请自行添加至错误处理
+            msg = mystery_post_data["yx"][yx]
+            print("院系编号 {0} 的账号登陆失败！如果多次出现该错误，请检查账号密码是否有误".format(msg))
         else:
+            mystery = mystery_post_data
             search_url = "http://kdjw.hnust.edu.cn/kdjw/cjzkAction.do?method=tofindCj0708ByXNBJ"
-            post_data = {
-                "kcly": "1",
-                "xqmc": "2016-2017-2",
-                "xnxq": "2016-2017-2",
-                "yx": "05",
-                "zy": "19B290C33DAE4EF1A152F5B92EAEC142",
-                "hbqkMc": "15网络2班",
-                "hbqkid": "C2AB1A6A42764013B37CF1E354DE25CF",
-                "pxfs": "1",
-                "pmfs": "3",
-                "xsfs": "1",
-                "xjzt": "01"
-            }
-            yield scrapy.FormRequest(url=search_url, formdata=post_data, meta={
-                "class_name": post_data["hbqkMc"], "term": post_data["xqmc"]}, dont_filter=True)
+            years = int(datetime.now().strftime("%Y"))
+            # 控制8个学期的循环
+            # 此处取前四年至当前年份的8个学期的数据，没有数据默认是取不到的，可以自定义这个循环参数
+            for i in range(years-4, years+1):
+                for j in range(1, 3):
+                    term = "-".join(list(map(str, [i, i+1, j])))
+                    # 控制一个院系不同班级的循环
+                    for mystery_index in range(len(mystery["zy"])):
+                        post_data = {
+                            "kcly": "1",
+                            "xqmc": term,
+                            "xnxq": term,
+                            "yx": str(yx),
+                            "zy": mystery["zy"][mystery_index],
+                            "hbqkMc": mystery["hbqkMc"][mystery_index],
+                            "hbqkid": mystery["hbqkid"][mystery_index],
+                            "pxfs": "1",
+                            "pmfs": "3",
+                            "xsfs": "1",
+                            "xjzt": "01"
+                        }
+                        yield scrapy.FormRequest(url=search_url, formdata=post_data, meta={
+                            "class_name": post_data["hbqkMc"], "term": post_data["xqmc"]}, dont_filter=True)

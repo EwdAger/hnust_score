@@ -35,14 +35,18 @@ class kdjwSpiderItem(scrapy.Item):
     course_time_list = scrapy.Field()
     stu_name = scrapy.Field()
     score_list = scrapy.Field()
-    class_name = scrapy.Field()
+    class_name = scrapy.Field(
+        output_processor=TakeFirst()
+    )
     fail_nums = scrapy.Field()
     avg_nums = scrapy.Field()
     credit_nums = scrapy.Field()
     avg_credit_nums = scrapy.Field()
     avg_credit_point_nums = scrapy.Field()
     rank = scrapy.Field()
-    term = scrapy.Field()
+    term = scrapy.Field(
+        output_processor=TakeFirst()
+    )
     crawl_time = scrapy.Field(
         input_processor=MapCompose(return_value),
         output_processor=TakeFirst()

@@ -94,17 +94,30 @@ ITEM_PIPELINES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
+# 开启记录cookies传递情况
+# COOKIES_DEBUG = True
 
-MYSQL_HOST = "localhost"
-MYSQL_DBNAME = "hnust_score"
-MYSQL_USER = "root"
-MYSQL_PASSWORD = "33Miss77###"
 
+# MySQL配置
+MYSQL_HOST = ""
+MYSQL_DBNAME = ""
+MYSQL_USER = ""
+MYSQL_PASSWORD = ""
+
+# 入库操作时间格式化配置（目前只用了SQL_DATETIME_FORMAT作为crawl_time）
 SQL_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 SQL_DATE_FORMAT = "%Y-%m-%d"
 
-# 教务网管理员账号密码
-ADMIN = '1051002'
-PASSWORD = 'darice1234'
-# 开启记录cookies传递情况
-# COOKIES_DEBUG = True
+# 教务网管理员账号密码(多个学院请按mystery_post_data里yx的排列顺序放置)
+ADMIN_LIST = ['']
+PASSWORD_LIST = ['']
+
+# post请求迷之参数配置
+# 其中默认院系(yx参数)为计算机学院，如果要加学院请在list后面添加院系代码
+# zy 和 hdqkid 这两个迷之参数如果有重复也请不要偷懒，一定要一一对应，添加到list后面
+mystery_post_data = {
+    "zy": [""],
+    "hbqkMc": [""],
+    "hbqkid": [""],
+    "yx": [""]
+}
